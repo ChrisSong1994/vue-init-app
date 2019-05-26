@@ -1,7 +1,8 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin')   //Vue Loader 的配置需要插件
-
+const AutoDllPlugin = require('autodll-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -36,7 +37,15 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: ['vue-style-loader', 'css-loader']
+                use: ['vue-style-loader', 'css-loader', 'postcss-loader']
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    "style-loader", // 将 JS 字符串生成为 style 节点
+                    "css-loader", // 将 CSS 转化成 CommonJS 模块
+                    "sass-loader" // 将 Sass 编译成 CSS，默认使用 Node Sass
+                ]
             }
         ]
     },
@@ -51,6 +60,16 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, '../index.html')
         }),
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new webpack.optimize.SplitChunksPlugin(),  // 提取共同的代码
+        new AutoDllPlugin({
+            inject: true, // will inject the DLL bundle to index.html
+            debug: true,
+            filename: '[name]_[hash].js',
+            path: './dll',
+            entry: {
+                vendor: ['vue', 'vue-router', 'vuex']
+            }
+        })
     ]
 };

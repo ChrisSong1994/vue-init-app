@@ -1,4 +1,5 @@
 const merge = require('webpack-merge');
+const webpack = require('webpack');
 const path = require('path');
 const baseConfig = require('./webpack.base.conf');
 module.exports = merge(baseConfig, {
@@ -6,6 +7,10 @@ module.exports = merge(baseConfig, {
     devtool: 'inline-source-map',
     devServer: {
         contentBase: path.resolve(__dirname, '../dist'),
-        open: true
-    }
+        open: true,
+        hot: true
+    },
+    plugins: [
+        new webpack.HotModuleReplacementPlugin()  //热更新
+    ]
 });
